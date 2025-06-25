@@ -26,6 +26,7 @@ class UserProfile(models.Model):
 class Work(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Пользователь')
     work_type = models.ForeignKey(WorkType, on_delete=models.CASCADE, verbose_name='Тип работы')
+    work_number = models.CharField('Номер работы', max_length=15, blank=True, null=True)
     date = models.DateTimeField('Дата', auto_now_add=True)
     month = models.IntegerField('Месяц')
     year = models.IntegerField('Год')

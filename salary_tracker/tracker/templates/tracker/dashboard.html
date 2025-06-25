@@ -5,6 +5,20 @@
 {% block content %}
 <div class="card mb-4">
     <div class="card-body">
+        <h5 class="card-title">Последние добавленные работы</h5>
+        <ul class="list-group">
+            {% for work in last_works %}
+            <li class="list-group-item">
+                {{ work.work_number }} - {{ work.work_type.name }} ({{ work.work_type.price }} руб.)
+                <span class="text-muted small">{{ work.date|date:"d.m.Y H:i" }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
         <h5 class="card-title">Общая информация</h5>
         <p class="card-text">Текущий месяц: <strong>{{ month_total }} руб.</strong></p>
         <p class="card-text">Всего: <strong>{{ all_time_total }} руб.</strong></p>

@@ -11,6 +11,10 @@
         <form method="post">
             {% csrf_token %}
             <div class="mb-3">
+                <label for="work_number" class="form-label">Номер работы:</label>
+                <input type="text" class="form-control" id="work_number" name="work_number" required>
+            </div>
+            <div class="mb-3">
                 <label for="work_type" class="form-label">Тип работы:</label>
                 <select class="form-select" id="work_type" name="work_type" required>
                     {% for work_type in work_types %}

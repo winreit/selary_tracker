@@ -14,6 +14,7 @@ class UserProfileAdmin(admin.ModelAdmin):
 class WorkAdmin(admin.ModelAdmin):
     list_display = ('user', 'work_type', 'date', 'month', 'year')
     list_filter = ('user', 'work_type')
+    search_fields = ('work_number',)
 
 @admin.register(MonthlyTotal)
 class MonthlyTotalAdmin(admin.ModelAdmin):

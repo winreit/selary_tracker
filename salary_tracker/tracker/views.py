@@ -45,25 +45,28 @@ def dashboard(request):
     ).aggregate(total=Sum('work_type__price'))['total'] or 0
 
     all_time_total = get_all_time_total(request.user)
+    last_works = Work.objects.filter(user=request.user).order_by('-date')[:5]  # Последние 5 работ
 
     context = {
         'month_total': month_total,
         'all_time_total': all_time_total,
+        'last_works': last_works,  # Добавляем в контекст
     }
     return render(request, 'tracker/dashboard.html', context)
-
 
 # Добавление работы
 @login_required
 def add_work(request):
     if request.method == 'POST':
         work_type_id = request.POST.get('work_type')
+        work_number = request.POST.get('work_number')
         work_type = WorkType.objects.get(id=work_type_id)
 
         now = timezone.now()
         Work.objects.create(
             user=request.user,
             work_type=work_type,
+            work_number=work_number,
             month=now.month,
             year=now.year
         )
