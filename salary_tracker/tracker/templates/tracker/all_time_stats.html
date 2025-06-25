@@ -1,0 +1,40 @@
+{% extends "tracker/base.html" %}
+
+{% block title %}Итог за все время{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4>Итог за все время</h4>
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">Общая сумма: {{ all_time_total }} руб.</h5>
+
+        <h5 class="mt-4">История по месяцам:</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Месяц/Год</th>
+                    <th>Сумма</th>
+                    <th>Дата сохранения</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for total in monthly_totals %}
+                <tr>
+                    <td>{{ total.month }}/{{ total.year }}</td>
+                    <td>{{ total.total }} руб.</td>
+                    <td>{{ total.save_date|date:"Y-m-d H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">Нет сохраненных месяцев</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <a href="{% url 'dashboard' %}" class="btn btn-primary">Назад</a>
+    </div>
+</div>
+{% endblock %}

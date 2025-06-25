@@ -1,0 +1,21 @@
+{% extends "tracker/base.html" %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Общая информация</h5>
+        <p class="card-text">Текущий месяц: <strong>{{ month_total }} руб.</strong></p>
+        <p class="card-text">Всего: <strong>{{ all_time_total }} руб.</strong></p>
+    </div>
+</div>
+
+<div class="d-grid gap-2">
+    <a href="{% url 'add_work' %}" class="btn btn-primary btn-lg">➕ Добавить работу</a>
+    <a href="{% url 'delete_last' %}" class="btn btn-danger btn-lg">🗑️ Удалить последнюю</a>
+    <a href="{% url 'save_month' %}" class="btn btn-success btn-lg">💾 Сохранить месяц</a>
+    <a href="{% url 'month_stats' %}" class="btn btn-info">📊 Итог за месяц</a>
+    <a href="{% url 'all_time_stats' %}" class="btn btn-info">⏳ Итог за все время</a>
+</div>
+{% endblock %}

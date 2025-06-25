@@ -1,0 +1,26 @@
+{% extends "tracker/base.html" %}
+
+{% block title %}Добавить работу{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4>Добавить работу</h4>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="work_type" class="form-label">Тип работы:</label>
+                <select class="form-select" id="work_type" name="work_type" required>
+                    {% for work_type in work_types %}
+                        <option value="{{ work_type.id }}">{{ work_type.name }} ({{ work_type.price }} руб.)</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Добавить</button>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Назад</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

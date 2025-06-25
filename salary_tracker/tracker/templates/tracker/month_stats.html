@@ -1,0 +1,15 @@
+{% extends "tracker/base.html" %}
+
+{% block title %}Итог за месяц{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h4>Итог за {{ current_month }}/{{ current_year }}</h4>
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">Общая сумма: {{ month_total }} руб.</h5>
+        <a href="{% url 'dashboard' %}" class="btn btn-primary">Назад</a>
+    </div>
+</div>
+{% endblock %}
