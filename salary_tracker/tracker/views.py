@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models import Sum
+from django.db.models import Sum, Count
 from .models import WorkType, Work, MonthlyTotal
 import datetime
+
 
 
 # Инициализация типов работ
@@ -38,41 +39,132 @@ def dashboard(request):
     initialize_work_types()
 
     now = timezone.now()
+
+    # Статистика за сегодня
+    today_works = Work.objects.filter(
+        user=request.user,
+        day=now.day,
+        month=now.month,
+        year=now.year
+    )
+    today_total = sum(w.work_type.price for w in today_works)
+
+    # Статистика за месяц
     month_total = Work.objects.filter(
         user=request.user,
         month=now.month,
         year=now.year
     ).aggregate(total=Sum('work_type__price'))['total'] or 0
 
+    # Общая статистика
     all_time_total = get_all_time_total(request.user)
-    last_works = Work.objects.filter(user=request.user).order_by('-date')[:5]  # Последние 5 работ
+
+    # Последние 5 работ
+    last_works = Work.objects.filter(user=request.user).order_by('-date')[:5]
+
+    # Последние 7 дней с работами (с проверкой на None)
+    last_days_query = Work.objects.filter(
+        user=request.user,
+        day__isnull=False  # Добавляем фильтр для исключения None
+    ).values(
+        'day', 'month', 'year'
+    ).annotate(
+        total=Sum('work_type__price'),
+        count=Count('id')
+    ).order_by('-year', '-month', '-day')[:7]
+
+    # Преобразуем QuerySet в список словарей с проверкой значений
+    last_days = []
+    for day in last_days_query:
+        if all(day[key] is not None for key in ['day', 'month', 'year']):
+            last_days.append({
+                'day': int(day['day']),
+                'month': int(day['month']),
+                'year': int(day['year']),
+                'total': day['total'],
+                'count': day['count']
+            })
 
     context = {
+        'today_total': today_total,
         'month_total': month_total,
         'all_time_total': all_time_total,
-        'last_works': last_works,  # Добавляем в контекст
+        'last_works': last_works,
+        'last_days': last_days,
+        'current_date': now.date()
     }
     return render(request, 'tracker/dashboard.html', context)
+
+# Статистика за день
+@login_required
+def day_stats(request, year=None, month=None, day=None):
+    now = timezone.now()
+    year = year or now.year
+    month = month or now.month
+    day = day or now.day
+
+    works = Work.objects.filter(
+        user=request.user,
+        day=day,
+        month=month,
+        year=year
+    ).select_related('work_type')
+
+    total = sum(w.work_type.price for w in works)
+
+    context = {
+        'works': works,
+        'total': total,
+        'current_date': f"{day}.{month}.{year}",
+        'prev_day': get_prev_day(year, month, day),
+        'next_day': get_next_day(year, month, day),
+    }
+    return render(request, 'tracker/day_stats.html', context)
+
+
+def get_prev_day(year, month, day):
+    try:
+        date = datetime.date(year, month, day) - datetime.timedelta(days=1)
+        return {'year': date.year, 'month': date.month, 'day': date.day}
+    except ValueError:
+        return None
+
+
+def get_next_day(year, month, day):
+    try:
+        date = datetime.date(year, month, day) + datetime.timedelta(days=1)
+        return {'year': date.year, 'month': date.month, 'day': date.day}
+    except ValueError:
+        return None
 
 # Добавление работы
 @login_required
 def add_work(request):
     if request.method == 'POST':
         work_type_id = request.POST.get('work_type')
-        work_number = request.POST.get('work_number')
-        work_type = WorkType.objects.get(id=work_type_id)
+        work_number = request.POST.get('work_number', '').strip()
 
-        now = timezone.now()
-        Work.objects.create(
-            user=request.user,
-            work_type=work_type,
-            work_number=work_number,
-            month=now.month,
-            year=now.year
-        )
+        if not work_number:
+            messages.error(request, 'Номер работы не может быть пустым')
+            return redirect('add_work')
 
-        messages.success(request, f'✅ Добавлено: {work_type.name} - {work_type.price} руб.')
-        return redirect('dashboard')
+
+        try:
+            work_type = WorkType.objects.get(id=work_type_id)
+
+            # Создаем работу - метод save() модели автоматически установит дату
+            Work.objects.create(
+                user=request.user,
+                work_type=work_type,
+                work_number=work_number
+            )
+
+            messages.success(request, f'✅ Добавлено: {work_number} - {work_type.name} - {work_type.price} руб.')
+            return redirect('dashboard')
+
+        except WorkType.DoesNotExist:
+            messages.error(request, 'Выбранный тип работы не существует')
+            return redirect('add_work')
 
     work_types = WorkType.objects.all()
     return render(request, 'tracker/add_work.html', {'work_types': work_types})
@@ -163,3 +255,17 @@ def get_all_time_total(user):
     )['total'] or 0
 
     return works_total + monthly_total
+
+def get_prev_day(year, month, day):
+    try:
+        date = datetime.date(year, month, day) - datetime.timedelta(days=1)
+        return {'year': date.year, 'month': date.month, 'day': date.day}
+    except ValueError:
+        return None
+
+def get_next_day(year, month, day):
+    try:
+        date = datetime.date(year, month, day) + datetime.timedelta(days=1)
+        return {'year': date.year, 'month': date.month, 'day': date.day}
+    except ValueError:
+        return None

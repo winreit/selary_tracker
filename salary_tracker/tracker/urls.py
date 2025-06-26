@@ -8,4 +8,6 @@ urlpatterns = [
     path('save-month/', views.save_month, name='save_month'),
     path('month-stats/', views.month_stats, name='month_stats'),
     path('all-time-stats/', views.all_time_stats, name='all_time_stats'),
+    path('day-stats/<int:year>/<int:month>/<int:day>/', views.day_stats, name='day_stats'),
+    path('day-stats/', views.day_stats, name='current_day_stats'),
 ]

@@ -1,0 +1,53 @@
+{% extends "tracker/base.html" %}
+
+{% block title %}Статистика за день{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Статистика за {{ current_date }}</h5>
+        <div>
+            {% if prev_day %}
+                <a href="{% url 'day_stats' year=prev_day.year month=prev_day.month day=prev_day.day %}"
+                   class="btn btn-sm btn-outline-secondary">← Предыдущий день</a>
+            {% endif %}
+            {% if next_day %}
+                <a href="{% url 'day_stats' year=next_day.year month=next_day.month day=next_day.day %}"
+                   class="btn btn-sm btn-outline-secondary">Следующий день →</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Номер работы</th>
+                    <th>Тип работы</th>
+                    <th>Сумма</th>
+                    <th>Время</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for work in works %}
+                <tr>
+                    <td>{{ work.work_number }}</td>
+                    <td>{{ work.work_type.name }}</td>
+                    <td>{{ work.work_type.price }} руб.</td>
+                    <td>{{ work.date|time:"H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">Нет работ за этот день</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="2">Итого:</th>
+                    <th colspan="2">{{ total }} руб.</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+{% endblock %}

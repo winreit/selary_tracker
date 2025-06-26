@@ -3,33 +3,131 @@
 {% block title %}Главная{% endblock %}
 
 {% block content %}
+<div class="row">
+    <!-- Общая статистика -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5><i class="bi bi-speedometer2"></i> Общая статистика</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="card text-white bg-success mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">Сегодня</h6>
+                                <p class="card-text h4">{{ today_total|default:0 }} руб.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card text-white bg-info mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">Текущий месяц</h6>
+                                <p class="card-text h4">{{ month_total|default:0 }} руб.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6 class="card-title">Всего заработано</h6>
+                        <p class="card-text h3 text-center">{{ all_time_total|default:0 }} руб.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Быстрые действия -->
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <h5><i class="bi bi-lightning-charge"></i> Быстрые действия</h5>
+            </div>
+            <div class="card-body d-grid gap-2">
+                <a href="{% url 'add_work' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle"></i> Добавить работу
+                </a>
+                <a href="{% url 'delete_last' %}" class="btn btn-danger btn-lg">
+                    <i class="bi bi-trash"></i> Удалить последнюю
+                </a>
+                <a href="{% url 'save_month' %}" class="btn btn-success btn-lg">
+                    <i class="bi bi-save"></i> Сохранить месяц
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Последние работы -->
 <div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5><i class="bi bi-clock-history"></i> Последние работы</h5>
+    </div>
     <div class="card-body">
-        <h5 class="card-title">Последние добавленные работы</h5>
-        <ul class="list-group">
-            {% for work in last_works %}
-            <li class="list-group-item">
-                {{ work.work_number }} - {{ work.work_type.name }} ({{ work.work_type.price }} руб.)
-                <span class="text-muted small">{{ work.date|date:"d.m.Y H:i" }}</span>
-            </li>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Дата</th>
+                        <th>Номер</th>
+                        <th>Тип работы</th>
+                        <th>Сумма</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for work in last_works %}
+                    <tr>
+                        <td>{{ work.date|date:"d.m.Y H:i" }}</td>
+                        <td>{{ work.work_number }}</td>
+                        <td>{{ work.work_type.name }}</td>
+                        <td>{{ work.work_type.price }} руб.</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">Нет последних работ</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Последние дни -->
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5><i class="bi bi-calendar3"></i> Последние дни</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for day_data in last_days %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <a href="{% url 'day_stats' year=day_data.year month=day_data.month day=day_data.day %}">
+                                {{ day_data.day }}.{{ day_data.month }}.{{ day_data.year }}
+                            </a>
+                        </h6>
+                        <p class="card-text">
+                            <span class="badge bg-primary rounded-pill">
+                                {{ day_data.total }} руб.
+                            </span>
+                            <span class="badge bg-secondary rounded-pill ms-1">
+                                {{ day_data.count }} работ
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <p class="text-center">Нет данных за последние дни</p>
+            </div>
             {% endfor %}
-        </ul>
+        </div>
     </div>
-</div>
-
-<div class="card mb-4">
-    <div class="card-body">
-        <h5 class="card-title">Общая информация</h5>
-        <p class="card-text">Текущий месяц: <strong>{{ month_total }} руб.</strong></p>
-        <p class="card-text">Всего: <strong>{{ all_time_total }} руб.</strong></p>
-    </div>
-</div>
-
-<div class="d-grid gap-2">
-    <a href="{% url 'add_work' %}" class="btn btn-primary btn-lg">➕ Добавить работу</a>
-    <a href="{% url 'delete_last' %}" class="btn btn-danger btn-lg">🗑️ Удалить последнюю</a>
-    <a href="{% url 'save_month' %}" class="btn btn-success btn-lg">💾 Сохранить месяц</a>
-    <a href="{% url 'month_stats' %}" class="btn btn-info">📊 Итог за месяц</a>
-    <a href="{% url 'all_time_stats' %}" class="btn btn-info">⏳ Итог за все время</a>
 </div>
 {% endblock %}
