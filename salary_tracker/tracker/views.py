@@ -160,7 +160,7 @@ def add_work(request):
             )
 
             messages.success(request, f'✅ Добавлено: {work_number} - {work_type.name} - {work_type.price} руб.')
-            return redirect('dashboard')
+            return redirect('add_work')
 
         except WorkType.DoesNotExist:
             messages.error(request, 'Выбранный тип работы не существует')
