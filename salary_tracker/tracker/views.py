@@ -205,7 +205,6 @@ def save_month(request):
             year=now.year,
             total=total
         )
-        works.delete()
         messages.success(request, f'💾 Месяц сохранен! Сумма: {total} руб.')
     else:
         messages.warning(request, 'ℹ️ Нет данных для сохранения за текущий месяц')
